@@ -1,3 +1,4 @@
+# python3
 # -*- coding:utf-8 -*-
 
 import urllib
@@ -116,6 +117,13 @@ if __name__ == '__main__':
 
 	while True:
 		print('Price checking start...')
+		try:
+			price_watcher.watcher(products)
+			print(time.ctime())
+			print('All price checked!\nWait 1.5 hours to do again...\n')
+		except Exception as e:
+			print(time.ctime())
+			print(e, '\n')
 
 		#每轮结束，等待一个半小时（5400秒）
 		sleep(5400)
