@@ -1,4 +1,3 @@
-#! /usr/bin/python
 # -*- coding:utf-8 -*-
 
 import urllib
@@ -10,19 +9,21 @@ import os
 import urllib.parse
 from bs4 import BeautifulSoup
 import random
-import config
+import sckey
 
 class PriceWatcher(object):
 
 	def __init__(self):
-		pass
+		if not os.path.isdir('./price'):
+			os.mkdir('./price')
+
 
 	def watcher(self, products):
 		fileHandle = open(products, 'r', encoding='gbk')
 		lines = fileHandle.readlines()
 		fileHandle.close()
 		for line in lines:
-			if line.startswith('#'):
+			if line.startswith('#') or line.startswith('\n'):
 				continue
 			else:
 				product_id = line.split(' ')[0]
@@ -41,6 +42,8 @@ class PriceWatcher(object):
 				elif current_price != former_price:
 					add_new_line(product_id, new_line)
 					send_notify(product_id, product_name, former_price, current_price)
+				
+				#随机等待1-5秒
 				sleep_time = random.randint(1,5)
 				sleep(sleep_time)
 
@@ -67,7 +70,7 @@ def get_current_price(product_id):
 		soup = BeautifulSoup(content, 'html.parser')
 		price_node = soup.find('span', id='jdPrice-copy')
 		if price_node is not None:
-			if price_node.get_text().startswith('¥')
+			if price_node.get_text().startswith('¥'):
 				current_price = price_node.get_text()[1:-1]
 			else:
 				current_price = '-1.00'
@@ -80,6 +83,7 @@ def get_current_price(product_id):
 
 
 def get_former_price(product_id):
+
 	file_name = './price/' + product_id + '.txt'
 	if os.path.isfile(file_name):
 		fh = open(file_name, 'r')
@@ -99,7 +103,7 @@ def add_new_line(product_id, new_line):
 	fh.close()
 
 def send_notify(product_id, product_name, former_price, current_price):
-	serverchan_sckey = config.serverchan_sckey
+	serverchan_sckey = sckey.serverchan_sckey
 	serverchan_api = 'http://sc.ftqq.com/' + serverchan_sckey +'.send?'
 	product_url = 'https://item.jd.com/' + product_id + '.html'
 	text = '价格变动通知'
@@ -112,12 +116,6 @@ if __name__ == '__main__':
 
 	while True:
 		print('Price checking start...')
-		try:
-			price_watcher.watcher(products)
-			print(time.ctime())
-			print('All price checked!\nWait one hour to do again...\n')
-		except:
-			print(time.ctime())
-			print('Unkonwn error...\n')
-		
+
+		#每轮结束，等待一个半小时（5400秒）
 		sleep(5400)
