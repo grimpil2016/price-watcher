@@ -1,6 +1,7 @@
 #ignore file
 config.py
 *.log
+products.txt
 price/
 __pycache__/
 Simple Version/*.log
